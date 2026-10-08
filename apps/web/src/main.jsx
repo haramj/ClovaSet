@@ -83,7 +83,11 @@ function useStored(key, initial) {
 function Logo() {
   return (
     <a href="#/" className="logo">
-      <img src="/media/icon.png" alt="Clova Set Logo" style={{width: 'auto', height: '52px'}} />
+      <img
+        src="/media/icon.png"
+        alt="Clova Set Logo"
+        style={{ width: "auto", height: "52px" }}
+      />
     </a>
   );
 }
