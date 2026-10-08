@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import RegistrationDrawer from "./RegistrationDrawer";
-import { loadRegistered, isDemoStorage } from "./registration-store";
+import { loadRegistered, isRegistrationAvailable } from "./registration-store";
 
 const products = [
   {
@@ -160,7 +160,7 @@ function App() {
     }
   }, [selected]);
   useEffect(() => {
-    if (route !== "closet") return;
+    if (route !== "closet" || !isRegistrationAvailable) return;
     let cancelled = false;
     loadRegistered()
       .then((items) => {
@@ -559,9 +559,9 @@ function App() {
               <div className="demo-badge">
                 <span className="blue-dot" /> 미리 만나는 동네 옷장
                 <small>
-                  {isDemoStorage
-                    ? "시연 내용은 이 브라우저에 저장돼요."
-                    : "Spring API와 연결된 동네 옷장입니다."}
+                  {isRegistrationAvailable
+                    ? "Spring API와 연결된 동네 옷장입니다."
+                    : "등록 서버 연결을 준비 중입니다."}
                 </small>
               </div>
             </div>
@@ -766,18 +766,14 @@ function App() {
       <RegistrationDrawer
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}
-        onRegistered={(product, demo) => {
+        onRegistered={(product) => {
           setRegistered((old) => [product, ...old]);
           setCategory("전체");
           setSearch("");
           setArea("전체 동네");
           setSavedOnly(false);
           setRegisterOpen(false);
-          setNotice(
-            demo
-              ? "옷이 등록됐어요. 이 브라우저에 저장됩니다."
-              : "옷이 등록됐어요. 동네 옷장에서 확인해보세요.",
-          );
+          setNotice("옷이 등록됐어요. 동네 옷장에서 확인해보세요.");
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
       />

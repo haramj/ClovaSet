@@ -35,6 +35,8 @@ jobs:
         run: npx prettier --check src index.html package.json
       - name: Build for GitHub Pages
         working-directory: apps/web
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build -- --base=/sharedclothes/
       - name: Verify deployment artifact
         run: node scripts/verify-build.mjs

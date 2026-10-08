@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-`apps/web`은 React + Vite 프론트엔드, `apps/api`는 Spring Boot 4.0.8 백엔드입니다. 옷 등록과 사진 저장은 로컬 Spring API → MySQL 8.4.11로 연결됩니다. 계정, 실제 대여 및 결제는 아직 시연 범위에 포함되지 않습니다.
+`apps/web`은 React + Vite 프론트엔드, `apps/api`는 Spring Boot 4.0.8 백엔드입니다. 옷 등록과 사진은 Spring API를 통해 MySQL 8.4.11에 저장합니다. 브라우저 저장소에는 등록 데이터를 저장하지 않습니다. 계정, 실제 대여 및 결제는 아직 시연 범위에 포함되지 않습니다.
 
 ## 의류 등록 시연
 
@@ -49,8 +49,8 @@ cd apps/api
 
 - 공개 웹: https://haramj.github.io/sharedclothes/
 - Actions: https://github.com/haramj/sharedclothes/actions/workflows/web.yml
-- 공개 웹은 GitHub Pages의 정적 사이트입니다. 이 환경에서 등록한 옷과 사진은 브라우저의 IndexedDB에 저장되며 다른 사용자와 공유되지 않습니다.
-- 로컬 전체 실행에서는 등록 정보와 사진이 MySQL에 저장됩니다. 공개용 백엔드 호스팅은 아직 연결되지 않았습니다.
+- 공개 웹은 GitHub Pages의 정적 사이트입니다. 공개용 Spring API와 MySQL 호스팅은 아직 연결되지 않아 공개 페이지의 등록 버튼은 비활성화됩니다. 브라우저에 등록 데이터를 저장하지 않습니다.
+- 공개용 서버가 준비되면 GitHub Actions 웹 빌드에 `VITE_API_URL=https://서버주소/api`를 설정하고, API 서버의 `WEB_ORIGIN=https://haramj.github.io`를 설정해야 합니다. DB는 서버의 영구 볼륨 또는 관리형 MySQL에 두어야 합니다.
 - PR에서 Spring API·MySQL 마이그레이션 테스트와 웹 빌드를 검사합니다. `main`에 푸시하면 검사 통과 후 GitHub Pages에 배포합니다.
 - 웹 배포 파일에는 API 키, `.env`, OpenCode 설정을 포함하지 않습니다.
 

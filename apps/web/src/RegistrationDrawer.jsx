@@ -8,7 +8,7 @@ import {
   MapPin,
   X,
 } from "lucide-react";
-import { isDemoStorage, saveRegistered } from "./registration-store";
+import { isRegistrationAvailable, saveRegistered } from "./registration-store";
 
 const OCCASIONS = {
   격식: ["레스토랑", "장례", "결혼하객", "면접"],
@@ -141,7 +141,7 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
         },
         photo,
       );
-      onRegistered(product, isDemoStorage);
+      onRegistered(product);
     } catch (ex) {
       setError(ex.message || "등록하지 못했어요. 잠시 후 다시 시도해주세요.");
     } finally {
@@ -415,12 +415,14 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
               className="registration-next"
               type="button"
               onClick={step === 3 ? submit : next}
-              disabled={saving}
+              disabled={saving || (step === 3 && !isRegistrationAvailable)}
             >
               {saving
                 ? "등록 중..."
                 : step === 3
-                  ? "내 옷 등록하기"
+                  ? isRegistrationAvailable
+                    ? "내 옷 등록하기"
+                    : "등록 서버 연결 대기 중"
                   : "다음으로"}
               {step === 3 ? (
                 <ArrowUpRight size={20} />
@@ -431,9 +433,9 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
           </div>
         </form>
         <p className="registration-note">
-          {isDemoStorage
-            ? "시연용 등록 내용은 이 브라우저에만 저장돼요."
-            : "등록 내용과 사진은 연결된 Spring API에 저장돼요."}
+          {isRegistrationAvailable
+            ? "등록 내용과 사진은 연결된 MySQL 데이터베이스에 저장돼요."
+            : "등록 서버 연결을 준비 중이에요. 연결 후 등록할 수 있어요."}
         </p>
       </aside>
     </div>
