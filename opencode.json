@@ -1,0 +1,30 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "clovastudio": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "HyperCLOVA X",
+      "options": {
+        "baseURL": "https://clovastudio.stream.ntruss.com/v1/openai/",
+        "apiKey": "{env:CLOVASTUDIO_API_KEY}"
+      },
+      "models": {
+        "HCX-005": {
+          "name": "HyperCLOVA X HCX-005",
+          "limit": {
+            "context": 128000,
+            "output": 4096
+          }
+        },
+        "HCX-DASH-001": {
+          "name": "HyperCLOVA X Dash",
+          "limit": {
+            "context": 4000,
+            "output": 512
+          }
+        }
+      }
+    }
+  },
+  "model": "clovastudio/HCX-005"
+}

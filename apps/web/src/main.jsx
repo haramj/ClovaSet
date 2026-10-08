@@ -169,25 +169,20 @@ function App() {
       location.hash = "/";
       setTimeout(
         () =>
-          document
-            .getElementById(id)
-            ?.scrollIntoView({
-              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? "instant"
-                : "smooth",
-            }),
+          document.getElementById(id)?.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "instant"
+              : "smooth",
+          }),
         70,
       );
     } else
-      document
-        .getElementById(id)
-        ?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "instant"
-            : "smooth",
-        });
+      document.getElementById(id)?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
   };
   const filtered = products.filter(
     (p) =>
@@ -235,7 +230,7 @@ function App() {
             <section className="hero">
               <div className="hero-media">
                 <img
-                  src="/media/hero.jpg"
+                  src={`${import.meta.env.BASE_URL}media/hero.jpg`}
                   alt="버건디 코트와 선글라스로 스타일을 완성한 모습"
                   fetchPriority="high"
                 />
@@ -247,11 +242,14 @@ function App() {
                     playsInline
                     autoPlay={!paused}
                     preload="metadata"
-                    poster="/media/hero.jpg"
+                    poster={`${import.meta.env.BASE_URL}media/hero.jpg`}
                     onError={() => setVideoFailed(true)}
                     aria-hidden="true"
                   >
-                    <source src="/media/brand-film.mp4" type="video/mp4" />
+                    <source
+                      src={`${import.meta.env.BASE_URL}media/brand-film.mp4`}
+                      type="video/mp4"
+                    />
                   </video>
                 )}
               </div>
@@ -333,7 +331,7 @@ function App() {
                 <div className="story-photo" data-reveal>
                   <img
                     loading="lazy"
-                    src="/media/dress.jpg"
+                    src={`${import.meta.env.BASE_URL}media/dress.jpg`}
                     alt="특별한 날을 위한 스카이 블루 드레스"
                   />
                   <div className="photo-caption">
@@ -428,7 +426,7 @@ function App() {
                   >
                     <img
                       loading="lazy"
-                      src={`/media/${x.image}.jpg`}
+                      src={`${import.meta.env.BASE_URL}media/${x.image}.jpg`}
                       alt={x.title}
                     />
                     <span className="occasion-num">{x.n}</span>
@@ -609,7 +607,10 @@ function App() {
                       onClick={(e) => openProduct(p, e)}
                       aria-label={`${p.name} 상세 보기`}
                     >
-                      <img src={`/media/${p.image}.jpg`} alt={p.name} />
+                      <img
+                        src={`${import.meta.env.BASE_URL}media/${p.image}.jpg`}
+                        alt={p.name}
+                      />
                     </button>
                     <span className="product-tag">{p.tag}</span>
                     <button
@@ -761,7 +762,10 @@ function ProductDetail({ product: p, onClose, onRequest }) {
         <X />
       </button>
       <div className="detail-image">
-        <img src={`/media/${p.image}.jpg`} alt={p.name} />
+        <img
+          src={`${import.meta.env.BASE_URL}media/${p.image}.jpg`}
+          alt={p.name}
+        />
       </div>
       <div className="detail-body">
         <span className="section-label">{p.brand}</span>

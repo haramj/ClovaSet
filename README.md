@@ -78,3 +78,40 @@ database/                   # 마이그레이션 및 샘플 데이터
 4. 의류 등록 → 동네 검색 → 대여 요청 → 수락 → 전달 → 반납의 실제 API 연동
 
 자세한 범위는 [MVP 기획](docs/product/mvp.md), 코드 배치는 [구조 가이드](docs/architecture/structure.md)를 참고하세요.
+
+
+## 공개 서비스와 CI/CD
+
+- 서비스: https://haramj.github.io/sharedclothes/
+- Actions: https://github.com/haramj/sharedclothes/actions/workflows/web.yml
+- PR: OpenCode 환경 로더 테스트 → 웹 의존성 설치 → 포맷 검사 → 프로덕션 빌드 → 배포 파일 검사
+- main 푸시 / 수동 실행: 위 검사 통과 후 GitHub Pages로 자동 배포
+- 배포 파일은 `apps/web/dist`만 사용합니다. API 키 없이 빌드하며 `.env`와 OpenCode 설정은 공개 웹에 포함하지 않습니다.
+- 현재 공개 서비스는 데모입니다. 계정, 실제 대여/결제 서버는 포함하지 않습니다.
+
+## OpenCode 개발 환경
+
+Node.js 22.12+와 npm이 필요합니다. 저장소 루트에서:
+
+```sh
+npm ci
+cp .env.example .env
+# .env에 CLOVASTUDIO_API_KEY 값을 입력
+npm run opencode
+```
+
+`npm ci`는 고정 버전 OpenCode CLI를 설치합니다. 전역 설치는 필요하지 않습니다.
+`.env`는 아래 한 줄만 있으면 됩니다. 키는 별도 보안 채널로 전달받으세요.
+
+```dotenv
+CLOVASTUDIO_API_KEY=여기에_전달받은_키
+```
+
+`npm run opencode`가 루트 `.env`를 읽고 기존 `opencode.json`의 HyperCLOVA X 설정에 주입합니다. 일반 `opencode` 명령은 이 로더를 거치지 않으므로 위 npm 명령을 사용하세요. `.env`는 Git에서 제외되며 템플릿만 공유됩니다. 키에 `VITE_` 접두사를 붙이지 마세요.
+
+```sh
+npm run opencode -- --version
+npm test
+```
+
+설정 참고: [OpenCode 환경 변수](https://opencode.ai/docs/config/#env-vars), [CLOVA Studio 호환 API](https://guide.ncloud-docs.com/docs/clovastudio-dev-langchain), [Vite GitHub Pages 배포](https://vite.dev/guide/static-deploy.html#github-pages).
