@@ -28,9 +28,9 @@ import {
 
 const products = [
   {
-    id: 1,
+    id: "sample-dress",
     name: "오늘의 주인공, 스카이 드레스",
-    category: "드레스",
+    category: "격식",
     brand: "STUDIO COLLECTION",
     image: "dress",
     price: 18000,
@@ -42,9 +42,9 @@ const products = [
       "자연스럽게 떨어지는 실루엣의 스카이 블루 드레스. 결혼식부터 특별한 저녁 약속까지 함께해요.",
   },
   {
-    id: 2,
+    id: "sample-jacket",
     name: "분위기를 완성하는 봄버 재킷",
-    category: "아우터",
+    category: "일상",
     brand: "WEEKEND WARDROBE",
     image: "jacket",
     price: 15000,
@@ -56,9 +56,9 @@ const products = [
       "가볍게 걸쳐도 멋스러운 빈티지 무드의 재킷. 평범한 일상에도 새로운 분위기를 더해요.",
   },
   {
-    id: 3,
+    id: "sample-bag",
     name: "작지만 확실한 포인트, 미니백",
-    category: "가방",
+    category: "파티",
     brand: "THE LITTLE THINGS",
     image: "bag",
     price: 9000,
@@ -452,21 +452,21 @@ function App() {
                     title: "마음을 전하는 날",
                     sub: "WEDDING GUEST",
                     image: "dress",
-                    category: "드레스",
+                    category: "격식",
                     n: "01",
                   },
                   {
                     title: "조금 다른 나를 만나는 날",
                     sub: "A SPECIAL DATE",
                     image: "jacket",
-                    category: "아우터",
+                    category: "일상",
                     n: "02",
                   },
                   {
                     title: "작은 포인트가 필요한 날",
                     sub: "FINISHING TOUCH",
                     image: "bag",
-                    category: "가방",
+                    category: "파티",
                     n: "03",
                   },
                 ].map((x) => (
@@ -673,15 +673,7 @@ function App() {
             </div>
             <div className="filters">
               <div className="categories">
-                {[
-                  "전체",
-                  "드레스",
-                  "아우터",
-                  "가방",
-                  "격식",
-                  "파티",
-                  "일상",
-                ].map((c) => (
+                {["전체", "격식", "파티", "일상"].map((c) => (
                   <button
                     key={c}
                     className={category === c ? "active" : ""}
