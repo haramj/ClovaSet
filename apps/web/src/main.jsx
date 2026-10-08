@@ -28,6 +28,12 @@ import {
   setDisplayName,
 } from "./registration-store";
 import { createChat, loadChat, loadChats, sendChatMessage } from "./chat-store";
+import {
+  demoTimestamp,
+  loadDemoChats,
+  makeDemoChat,
+  saveDemoChats,
+} from "./demo-chats";
 
 const products = [
   {
@@ -110,6 +116,7 @@ function App() {
   const [saved, setSaved] = useStored("sharedclothes:saved", []);
   const [registered, setRegistered] = useState([]),
     [chats, setChats] = useState([]),
+    [demoChats, setDemoChats] = useState(loadDemoChats),
     [activeChat, setActiveChat] = useState(null),
     [chatError, setChatError] = useState(""),
     [registerOpen, setRegisterOpen] = useState(false),
@@ -159,6 +166,9 @@ function App() {
     const id = setTimeout(() => setNotice(""), 3500);
     return () => clearTimeout(id);
   }, [notice]);
+  useEffect(() => {
+    saveDemoChats(demoChats);
+  }, [demoChats]);
   useEffect(() => {
     if (route !== "home" || !video.current) return;
     if (paused) video.current.pause();
@@ -213,7 +223,7 @@ function App() {
     };
   }, [route, demoUnlocked]);
   useEffect(() => {
-    if (!activeChat) return;
+    if (!activeChat || activeChat.chat.demo) return;
     let mounted = true;
     const timer = setInterval(() => {
       loadChat(activeChat.chat.id)
@@ -227,9 +237,13 @@ function App() {
       clearInterval(timer);
     };
   }, [activeChat?.chat.id]);
-  const openChat = async (id) => {
+  const openChat = async (chat) => {
+    if (chat.demo) {
+      setActiveChat(demoChats.find((room) => room.chat.id === chat.id) || null);
+      return;
+    }
     try {
-      setActiveChat(await loadChat(id));
+      setActiveChat(await loadChat(chat.id));
       setChatError("");
     } catch (error) {
       setChatError(error.message);
@@ -255,6 +269,9 @@ function App() {
   const productImage = (product) =>
     product.imageUrl || `${import.meta.env.BASE_URL}media/${product.image}.jpg`;
   const allProducts = [...registered, ...products];
+  const allChats = [...chats, ...demoChats.map((room) => room.chat)].sort(
+    (a, b) => b.createdAt.localeCompare(a.createdAt),
+  );
   const toggleSave = (id) =>
     setSaved((old) =>
       old.includes(id) ? old.filter((x) => x !== id) : [...old, id],
@@ -664,7 +681,7 @@ function App() {
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
                 >
-                  나의 채팅 {chats.length} <ArrowRight size={16} />
+                  나의 채팅 {allChats.length} <ArrowRight size={16} />
                 </button>
               </div>
               <div className="demo-badge">
@@ -824,7 +841,7 @@ function App() {
             >
               <div className="results-title">
                 <h2 id="chats-title">
-                  나의 채팅 <span>{chats.length}</span>
+                  나의 채팅 <span>{allChats.length}</span>
                 </h2>
                 <span>대여 요청과 대화만 진행돼요 · 예약·결제 없음</span>
               </div>
@@ -833,23 +850,27 @@ function App() {
                   {chatError}
                 </p>
               )}
-              {chats.length === 0 && !chatError && (
+              {allChats.length === 0 && !chatError && (
                 <p className="chats-empty">
                   옷을 등록하거나 대여 요청을 보내면 여기에서 채팅방을 볼 수
                   있어요.
                 </p>
               )}
               <div className="chat-list">
-                {chats.map((chat) => (
+                {allChats.map((chat) => (
                   <button
                     className="chat-card"
                     key={chat.id}
-                    onClick={() => openChat(chat.id)}
+                    onClick={() => openChat(chat)}
                   >
                     <span className="chat-card-top">
                       <strong>{chat.clothingName}</strong>
                       <small>
-                        {chat.role === "owner" ? "받은 요청" : "보낸 요청"}
+                        {chat.demo
+                          ? "시연 채팅"
+                          : chat.role === "owner"
+                            ? "받은 요청"
+                            : "보낸 요청"}
                       </small>
                     </span>
                     <span>
@@ -906,6 +927,23 @@ function App() {
           room={activeChat}
           onClose={() => setActiveChat(null)}
           onSend={async (body) => {
+            if (activeChat.chat.demo) {
+              const createdAt = demoTimestamp();
+              const updated = {
+                chat: { ...activeChat.chat, lastMessage: body, createdAt },
+                messages: [
+                  ...activeChat.messages,
+                  { id: crypto.randomUUID(), mine: true, body, createdAt },
+                ],
+              };
+              setActiveChat(updated);
+              setDemoChats((old) =>
+                old.map((room) =>
+                  room.chat.id === updated.chat.id ? updated : room,
+                ),
+              );
+              return;
+            }
             const updated = await sendChatMessage(activeChat.chat.id, body);
             setActiveChat(updated);
             loadChats()
@@ -929,13 +967,28 @@ function App() {
             product={selected}
             onClose={() => setSelected(null)}
             onRequest={async (request) => {
-              const room = await createChat(request);
+              const product = selected;
+              const simulated = !product.chatAvailable || product.ownedByMe;
+              const room = simulated
+                ? makeDemoChat(request, product.name)
+                : await createChat({
+                    clothingId: request.clothingId,
+                    requesterName: request.requesterName,
+                    start: request.start,
+                    end: request.end,
+                  });
+              if (simulated) setDemoChats((old) => [room, ...old]);
               setSelected(null);
               setActiveChat(room);
-              loadChats()
-                .then(setChats)
-                .catch(() => {});
-              setNotice("올린 사람에게 대여 요청 메시지를 보냈어요.");
+              if (!simulated)
+                loadChats()
+                  .then(setChats)
+                  .catch(() => {});
+              setNotice(
+                simulated
+                  ? "시연용 채팅방을 열었어요. 실제 올린 사람에게 전송되지는 않아요."
+                  : "올린 사람에게 대여 요청 메시지를 보냈어요.",
+              );
             }}
           />
         )}
@@ -956,6 +1009,7 @@ function ProductDetail({ product: p, onClose, onRequest }) {
   const localDate = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const min = localDate(today);
+  const demoMode = !p.chatAvailable || p.ownedByMe;
   const [start, setStart] = useState(""),
     [end, setEnd] = useState(""),
     [requesterName, setRequesterName] = useState(getDisplayName),
@@ -973,7 +1027,9 @@ function ProductDetail({ product: p, onClose, onRequest }) {
     end >= start &&
     days > 0 &&
     days <= 30 &&
-    (!p.registered || (start >= p.rentalStart && end <= p.rentalEnd));
+    (demoMode ||
+      !p.registered ||
+      (start >= p.rentalStart && end <= p.rentalEnd));
   return (
     <>
       <button
@@ -1006,23 +1062,18 @@ function ProductDetail({ product: p, onClose, onRequest }) {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-            if (
-              !valid ||
-              !requesterName.trim() ||
-              !p.chatAvailable ||
-              p.ownedByMe
-            )
-              return;
+            if (!valid || (!demoMode && !requesterName.trim())) return;
             setSending(true);
             setRequestError("");
             try {
               await onRequest({
                 clothingId: p.id,
-                requesterName: requesterName.trim(),
+                requesterName: requesterName.trim() || "동네 이웃",
                 start,
                 end,
+                total: days * p.price,
               });
-              setDisplayName(requesterName);
+              if (requesterName.trim()) setDisplayName(requesterName);
             } catch (error) {
               setRequestError(error.message);
             } finally {
@@ -1031,25 +1082,31 @@ function ProductDetail({ product: p, onClose, onRequest }) {
           }}
         >
           <h3>언제 필요한가요?</h3>
-          <label className="chat-name-field">
-            채팅에서 사용할 이름
-            <input
-              type="text"
-              maxLength="40"
-              required
-              value={requesterName}
-              onChange={(e) => setRequesterName(e.target.value)}
-              placeholder="예: 서농동 이웃"
-            />
-          </label>
+          {!demoMode && (
+            <label className="chat-name-field">
+              채팅에서 사용할 이름
+              <input
+                type="text"
+                maxLength="40"
+                required
+                value={requesterName}
+                onChange={(e) => setRequesterName(e.target.value)}
+                placeholder="예: 서농동 이웃"
+              />
+            </label>
+          )}
           <div className="dates">
             <label>
               대여일
               <input
                 type="date"
                 required
-                min={p.registered && p.rentalStart > min ? p.rentalStart : min}
-                max={p.registered ? p.rentalEnd : undefined}
+                min={
+                  !demoMode && p.registered && p.rentalStart > min
+                    ? p.rentalStart
+                    : min
+                }
+                max={!demoMode && p.registered ? p.rentalEnd : undefined}
                 value={start}
                 onInput={(e) => {
                   setStart(e.target.value);
@@ -1063,15 +1120,16 @@ function ProductDetail({ product: p, onClose, onRequest }) {
                 type="date"
                 required
                 min={start || min}
-                max={p.registered ? p.rentalEnd : undefined}
+                max={!demoMode && p.registered ? p.rentalEnd : undefined}
                 value={end}
                 onInput={(e) => setEnd(e.target.value)}
               />
             </label>
           </div>
           <p className="date-help">
-            대여일과 반납일을 포함해 계산해요. 등록된 대여 기간 안에서 최대
-            30일까지 선택할 수 있어요.
+            {demoMode
+              ? "대여일과 반납일을 포함해 계산해요. 최대 30일까지 시연할 수 있어요."
+              : "대여일과 반납일을 포함해 계산해요. 등록된 대여 기간 안에서 최대 30일까지 선택할 수 있어요."}
           </p>
           <div className="total">
             <span>
@@ -1082,7 +1140,7 @@ function ProductDetail({ product: p, onClose, onRequest }) {
           <button
             className="button blue"
             type="submit"
-            disabled={!valid || !p.chatAvailable || p.ownedByMe || sending}
+            disabled={!valid || sending}
           >
             {sending ? "채팅방 여는 중..." : "대여 요청 메시지 보내기"}{" "}
             <ArrowUpRight size={18} />
@@ -1093,11 +1151,9 @@ function ProductDetail({ product: p, onClose, onRequest }) {
             </p>
           )}
           <p className="demo-note">
-            {p.ownedByMe
-              ? "내가 등록한 옷에는 대여 요청을 보낼 수 없어요."
-              : !p.chatAvailable
-                ? "이 옷은 올린 사람 정보가 없어 채팅을 연결할 수 없어요. 새로 등록한 옷에서 이용해주세요."
-                : "요청 내용이 올린 사람의 채팅방에 전달됩니다. 예약이나 결제는 진행되지 않아요."}
+            {demoMode
+              ? "시연용 채팅방으로 이동합니다. 실제 올린 사람에게 전송되지 않으며 예약·결제도 진행되지 않아요."
+              : "요청 내용이 올린 사람의 채팅방에 전달됩니다. 예약이나 결제는 진행되지 않아요."}
           </p>
         </form>
       </div>
@@ -1138,7 +1194,11 @@ function ChatRoom({ room, onClose, onSend }) {
         <header className="chat-room-header">
           <div>
             <small>
-              {room.chat.role === "owner" ? "받은 대여 요청" : "보낸 대여 요청"}
+              {room.chat.demo
+                ? "시연용 채팅"
+                : room.chat.role === "owner"
+                  ? "받은 대여 요청"
+                  : "보낸 대여 요청"}
             </small>
             <h2 id="chat-room-title">{otherName}님과의 채팅</h2>
           </div>
@@ -1156,7 +1216,11 @@ function ChatRoom({ room, onClose, onSend }) {
             {room.chat.start} — {room.chat.end}
           </span>
           <span>예상 대여 금액 {won(Number(room.chat.total))}원</span>
-          <small>채팅 요청 단계 · 예약과 결제는 진행되지 않아요.</small>
+          <small>
+            {room.chat.demo
+              ? "시연 화면 · 실제 올린 사람에게 전송되지 않아요."
+              : "채팅 요청 단계 · 예약과 결제는 진행되지 않아요."}
+          </small>
         </div>
         <div className="chat-messages" aria-live="polite">
           {room.messages.map((item) => (
