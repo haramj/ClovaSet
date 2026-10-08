@@ -80,15 +80,9 @@ function useStored(key, initial) {
 }
 function Logo() {
   return (
-    <>
-      <span className="logo-symbol">
-        <Shirt size={23} />
-      </span>
-      <span>
-        Clova<span className="logo-light">Set</span>
-        <i>®</i>
-      </span>
-    </>
+    <a href="#/" className="logo">
+      <img src="/media/icon.png" alt="Clova Set Logo" style={{width: 'auto', height: '52px'}} />
+    </a>
   );
 }
 function App() {
