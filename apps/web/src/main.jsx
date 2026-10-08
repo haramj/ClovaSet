@@ -482,7 +482,12 @@ function App() {
                       autoPlay={!paused}
                       preload="metadata"
                       loading="lazy"
-                      style = {{width : '100%', height : '100%', objectFit: "cover", filter: 'brightness(70%)',}}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        filter: "brightness(70%)",
+                      }}
                       src={`${import.meta.env.BASE_URL}media/${x.video}.mp4`}
                       alt={x.title}
                     />
