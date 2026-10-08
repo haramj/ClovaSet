@@ -755,6 +755,14 @@ function App() {
           <span>MADE FOR MOMENTS, SHARED WITH NEIGHBORS.</span>
         </div>
       </footer>
+      {route === "closet" && !registerOpen && (
+        <div className="register-dock">
+          <span>옷장에 잠든 옷이 있나요?</span>
+          <button onClick={() => setRegisterOpen(true)}>
+            내 옷 등록하기 <ArrowUpRight size={17} />
+          </button>
+        </div>
+      )}
       <RegistrationDrawer
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}

@@ -2093,3 +2093,56 @@ p {
     animation: none;
   }
 }
+
+.register-dock {
+  position: fixed;
+  right: 30px;
+  bottom: 27px;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid #e2e8dd;
+  background: #fffffff2;
+  backdrop-filter: blur(18px);
+  padding: 8px 8px 8px 20px;
+  border-radius: 10px;
+  box-shadow: 0 13px 40px #14221b23;
+}
+.register-dock span {
+  font-size: 11px;
+  color: #667762;
+}
+.register-dock button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--blue);
+  color: white;
+  padding: 13px 16px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.closet {
+  padding-bottom: 145px;
+}
+@media (max-width: 700px) {
+  .register-dock {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    justify-content: space-between;
+    gap: 7px;
+    padding: 7px 7px 7px 14px;
+  }
+  .register-dock span {
+    font-size: 10px;
+  }
+  .register-dock button {
+    padding: 13px 11px;
+    font-size: 11px;
+    gap: 8px;
+    white-space: nowrap;
+  }
+}
