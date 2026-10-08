@@ -449,23 +449,23 @@ function App() {
               <div className="occasion-grid">
                 {[
                   {
-                    title: "마음을 전하는 날",
-                    sub: "WEDDING GUEST",
-                    image: "dress",
+                    title: "격식",
+                    sub: "",
+                    video: "formal",
                     category: "격식",
                     n: "01",
                   },
                   {
-                    title: "조금 다른 나를 만나는 날",
-                    sub: "A SPECIAL DATE",
-                    image: "jacket",
+                    title: "일상",
+                    sub: "",
+                    video: "daily",
                     category: "일상",
                     n: "02",
                   },
                   {
-                    title: "작은 포인트가 필요한 날",
-                    sub: "FINISHING TOUCH",
-                    image: "bag",
+                    title: "파티",
+                    sub: "",
+                    video: "party",
                     category: "파티",
                     n: "03",
                   },
@@ -473,13 +473,20 @@ function App() {
                   <a
                     data-reveal
                     href="#/closet"
-                    className={`occasion ${x.image}`}
+                    className={`occasion ${x.video}`}
                     key={x.n}
                     onClick={() => setCategory(x.category)}
                   >
-                    <img
+                    <video
+                      ref={video}
+                      muted
+                      loop
+                      playsInline
+                      autoPlay={!paused}
+                      preload="metadata"
                       loading="lazy"
-                      src={`${import.meta.env.BASE_URL}media/${x.image}.jpg`}
+                      style = {{width : '100%', height : '100%', objectFit: "cover", filter: 'brightness(70%)',}}
+                      src={`${import.meta.env.BASE_URL}media/${x.video}.mp4`}
                       alt={x.title}
                     />
                     <span className="occasion-num">{x.n}</span>
