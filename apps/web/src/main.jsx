@@ -28,6 +28,7 @@ import {
   setDisplayName,
 } from "./registration-store";
 import { createChat, loadChat, loadChats, sendChatMessage } from "./chat-store";
+import { randomId } from "./random-id";
 import {
   demoTimestamp,
   loadDemoChats,
@@ -933,7 +934,7 @@ function App() {
                 chat: { ...activeChat.chat, lastMessage: body, createdAt },
                 messages: [
                   ...activeChat.messages,
-                  { id: crypto.randomUUID(), mine: true, body, createdAt },
+                  { id: randomId(), mine: true, body, createdAt },
                 ],
               };
               setActiveChat(updated);

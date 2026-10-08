@@ -1,3 +1,5 @@
+import { randomId } from "./random-id";
+
 const DEMO_CHATS_KEY = "sharedclothes:demo-chats";
 const LEGACY_REQUESTS_KEY = "sharedclothes:demo-requests";
 
@@ -5,7 +7,7 @@ export function demoTimestamp() {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 19);
 }
 
-export function makeDemoChat(request, clothingName, id = crypto.randomUUID()) {
+export function makeDemoChat(request, clothingName, id = randomId()) {
   const createdAt = demoTimestamp();
   const body = `안녕하세요! ${clothingName} 대여를 ${request.start}부터 ${request.end}까지 요청드려요. 예상 금액은 ${Number(request.total).toLocaleString("ko-KR")}원입니다. 가능할까요?`;
   return {
@@ -38,7 +40,7 @@ export function loadDemoChats() {
         makeDemoChat(
           { ...item, requesterName: "동네 이웃" },
           item.name,
-          item.id || crypto.randomUUID(),
+          item.id || randomId(),
         ),
       );
   } catch {

@@ -1,3 +1,5 @@
+import { randomId } from "./random-id";
+
 const API_BASE =
   import.meta.env.VITE_API_URL?.trim() || (import.meta.env.DEV ? "/api" : null);
 const CODE_KEY = "clovaset:demo-access-code";
@@ -18,7 +20,7 @@ export function setDemoAccessCode(code) {
 export function participantToken() {
   let token = localStorage.getItem(PARTICIPANT_KEY);
   if (!token) {
-    token = crypto.randomUUID();
+    token = randomId();
     localStorage.setItem(PARTICIPANT_KEY, token);
   }
   return token;
