@@ -17,6 +17,8 @@ import {
   CalendarDays,
 } from "lucide-react";
 import "./styles.css";
+import RegistrationDrawer from "./RegistrationDrawer";
+import { loadRegistered, isRegistrationAvailable } from "./registration-store";
 
 const products = [
   {
@@ -96,7 +98,9 @@ function App() {
     [savedOnly, setSavedOnly] = useState(false);
   const [saved, setSaved] = useStored("sharedclothes:saved", []),
     [requests, setRequests] = useStored("sharedclothes:demo-requests", []);
-  const [selected, setSelected] = useState(null),
+  const [registered, setRegistered] = useState([]),
+    [registerOpen, setRegisterOpen] = useState(false),
+    [selected, setSelected] = useState(null),
     [notice, setNotice] = useState("");
   const [paused, setPaused] = useState(
       () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -149,6 +153,24 @@ function App() {
       trigger.current?.focus();
     }
   }, [selected]);
+  useEffect(() => {
+    if (route !== "closet" || !isRegistrationAvailable) return;
+    let cancelled = false;
+    loadRegistered()
+      .then((items) => {
+        if (!cancelled) setRegistered(items);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setNotice("등록된 옷을 불러오지 못했어요. API를 확인해주세요.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [route]);
+  const productImage = (product) =>
+    product.imageUrl || `${import.meta.env.BASE_URL}media/${product.image}.jpg`;
+  const allProducts = [...registered, ...products];
   const toggleSave = (id) =>
     setSaved((old) =>
       old.includes(id) ? old.filter((x) => x !== id) : [...old, id],
@@ -178,7 +200,7 @@ function App() {
           : "smooth",
       });
   };
-  const filtered = products.filter(
+  const filtered = allProducts.filter(
     (p) =>
       (category === "전체" || p.category === category) &&
       (!savedOnly || saved.includes(p.id)) &&
@@ -530,8 +552,31 @@ function App() {
               </div>
               <div className="demo-badge">
                 <span className="blue-dot" /> 미리 만나는 동네 옷장
-                <small>예시 상품으로 체험하는 서비스입니다.</small>
+                <small>
+                  {isRegistrationAvailable
+                    ? "Spring API와 연결된 동네 옷장입니다."
+                    : "등록 서버 연결을 준비 중입니다."}
+                </small>
               </div>
+            </div>
+            <div className="register-banner">
+              <div>
+                <span className="register-banner-mark">
+                  YOUR CLOSET, THEIR NEXT MOMENT
+                </span>
+                <h2>
+                  옷장 속 특별한 옷,
+                  <br />
+                  이웃과 나눠볼까요?
+                </h2>
+                <p>사진 한 장이면 우리 동네 옷장에 등록할 수 있어요.</p>
+              </div>
+              <button
+                className="register-banner-button"
+                onClick={() => setRegisterOpen(true)}
+              >
+                내 옷 등록하기 <ArrowUpRight size={19} />
+              </button>
             </div>
             <div className="search-row">
               <label className="search-box">
@@ -562,12 +607,21 @@ function App() {
                   <option>전체 동네</option>
                   <option>성수동</option>
                   <option>서울숲</option>
+                  <option>서농동</option>
                 </select>
               </label>
             </div>
             <div className="filters">
               <div className="categories">
-                {["전체", "드레스", "아우터", "가방"].map((c) => (
+                {[
+                  "전체",
+                  "드레스",
+                  "아우터",
+                  "가방",
+                  "격식",
+                  "파티",
+                  "일상",
+                ].map((c) => (
                   <button
                     key={c}
                     className={category === c ? "active" : ""}
@@ -591,7 +645,7 @@ function App() {
                 {savedOnly ? "나의 관심 옷장" : "이웃의 옷장"}{" "}
                 <span>{filtered.length}</span>
               </h2>
-              <span>샘플 컬렉션 · 1일 대여 기준</span>
+              <span>동네 옷장 · 1일 대여 기준</span>
             </div>
             <div className="product-grid">
               {filtered.map((p) => (
@@ -601,10 +655,7 @@ function App() {
                       onClick={(e) => openProduct(p, e)}
                       aria-label={`${p.name} 상세 보기`}
                     >
-                      <img
-                        src={`${import.meta.env.BASE_URL}media/${p.image}.jpg`}
-                        alt={p.name}
-                      />
+                      <img src={productImage(p)} alt={p.name} />
                     </button>
                     <span className="product-tag">{p.tag}</span>
                     <button
@@ -698,6 +749,28 @@ function App() {
           <span>MADE FOR MOMENTS, SHARED WITH NEIGHBORS.</span>
         </div>
       </footer>
+      {route === "closet" && !registerOpen && (
+        <div className="register-dock">
+          <span>옷장에 잠든 옷이 있나요?</span>
+          <button onClick={() => setRegisterOpen(true)}>
+            내 옷 등록하기 <ArrowUpRight size={17} />
+          </button>
+        </div>
+      )}
+      <RegistrationDrawer
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        onRegistered={(product) => {
+          setRegistered((old) => [product, ...old]);
+          setCategory("전체");
+          setSearch("");
+          setArea("전체 동네");
+          setSavedOnly(false);
+          setRegisterOpen(false);
+          setNotice("옷이 등록됐어요. 동네 옷장에서 확인해보세요.");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
       <dialog
         ref={dialog}
         className="product-dialog"
@@ -757,7 +830,7 @@ function ProductDetail({ product: p, onClose, onRequest }) {
       </button>
       <div className="detail-image">
         <img
-          src={`${import.meta.env.BASE_URL}media/${p.image}.jpg`}
+          src={p.imageUrl || `${import.meta.env.BASE_URL}media/${p.image}.jpg`}
           alt={p.name}
         />
       </div>
