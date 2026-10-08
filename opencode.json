@@ -6,7 +6,9 @@
       "name": "HyperCLOVA X",
       "options": {
         "baseURL": "https://clovastudio.stream.ntruss.com/v1/openai/",
-        "apiKey": "{env:CLOVASTUDIO_API_KEY}"
+        "apiKey": "{env:CLOVASTUDIO_API_KEY}",
+        "max_tokens": 4096,
+        "timeout": false
       },
       "models": {
         "HCX-005": {
@@ -26,5 +28,12 @@
       }
     }
   },
-  "model": "clovastudio/HCX-005"
+  "model": "clovastudio/HCX-005",
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "tail_turns": 3,
+    "preserve_recent_tokens": 30000
+  }
 }
+

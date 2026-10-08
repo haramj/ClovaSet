@@ -85,7 +85,7 @@ function Logo() {
         <Shirt size={23} />
       </span>
       <span>
-        shared<span className="logo-light">clothes</span>
+        Clova<span className="logo-light">Set</span>
         <i>®</i>
       </span>
     </>
@@ -204,7 +204,7 @@ function App() {
         본문으로 건너뛰기
       </a>
       <header className="header">
-        <a href="#/" className="logo" aria-label="Shared Clothes 홈">
+        <a href="#/" className="logo" aria-label="clovaset 홈">
           <Logo />
         </a>
         <nav className={menu ? "nav open" : "nav"} aria-label="주 메뉴">
@@ -700,7 +700,7 @@ function App() {
         </a>
         <p>좋은 옷의 다음 이야기를 함께해요.</p>
         <div>
-          <span>© {new Date().getFullYear()} Shared Clothes</span>
+          <span>© {new Date().getFullYear()} clovaset</span>
           <span>MADE FOR MOMENTS, SHARED WITH NEIGHBORS.</span>
         </div>
       </footer>
