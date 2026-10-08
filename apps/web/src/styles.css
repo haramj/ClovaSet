@@ -1679,7 +1679,7 @@ p {
   justify-content: space-between;
   align-items: end;
   gap: 30px;
-  background: #24372b;
+  background: #2855ed;
   color: #fff;
   border-radius: 14px;
   padding: 36px 42px;
@@ -1689,7 +1689,7 @@ p {
 .registration-kicker {
   font-size: 10px;
   letter-spacing: 1.5px;
-  color: #bde49d;
+  color: #8baefd;
   font-weight: 700;
 }
 .register-banner h2 {
@@ -1700,14 +1700,14 @@ p {
 }
 .register-banner p {
   font-size: 12px;
-  color: #c2cebf;
+  color: #b6c2cd;
 }
 .register-banner-button {
   display: flex;
   align-items: center;
   gap: 25px;
-  background: #e5f2d1;
-  color: #263d27;
+  background: #c2defe;
+  color: #3744a4;
   border-radius: 8px;
   padding: 16px 18px;
   white-space: nowrap;
