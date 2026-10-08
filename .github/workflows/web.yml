@@ -37,7 +37,13 @@ jobs:
         working-directory: apps/web
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
-        run: npm run build -- --base=/sharedclothes/
+          VITE_DEMO_ACCESS_REQUIRED: ${{ vars.VITE_DEMO_ACCESS_REQUIRED }}
+        run: |
+          if [ -n "$VITE_API_URL" ] && [ "$VITE_DEMO_ACCESS_REQUIRED" != "true" ]; then
+            echo "Public API builds require the demo access gate."
+            exit 1
+          fi
+          npm run build -- --base=/sharedclothes/
       - name: Verify deployment artifact
         run: node scripts/verify-build.mjs
       - name: Upload Pages artifact

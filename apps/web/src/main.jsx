@@ -18,7 +18,13 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import RegistrationDrawer from "./RegistrationDrawer";
-import { loadRegistered, isRegistrationAvailable } from "./registration-store";
+import {
+  loadRegistered,
+  isRegistrationAvailable,
+  isDemoAuthRequired,
+  hasDemoAccessCode,
+  setDemoAccessCode,
+} from "./registration-store";
 
 const products = [
   {
@@ -102,6 +108,12 @@ function App() {
     [registerOpen, setRegisterOpen] = useState(false),
     [selected, setSelected] = useState(null),
     [notice, setNotice] = useState("");
+  const [demoUnlocked, setDemoUnlocked] = useState(
+      () => !isDemoAuthRequired || hasDemoAccessCode(),
+    ),
+    [demoCode, setDemoCode] = useState(""),
+    [demoAccessError, setDemoAccessError] = useState(""),
+    [demoChecking, setDemoChecking] = useState(false);
   const [paused, setPaused] = useState(
       () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     ),
@@ -154,20 +166,41 @@ function App() {
     }
   }, [selected]);
   useEffect(() => {
-    if (route !== "closet" || !isRegistrationAvailable) return;
+    if (route !== "closet" || !isRegistrationAvailable || !demoUnlocked) return;
     let cancelled = false;
     loadRegistered()
       .then((items) => {
         if (!cancelled) setRegistered(items);
       })
-      .catch(() => {
-        if (!cancelled)
-          setNotice("등록된 옷을 불러오지 못했어요. API를 확인해주세요.");
+      .catch((error) => {
+        if (cancelled) return;
+        if (isDemoAuthRequired && error.message.includes("접속 코드")) {
+          setDemoAccessCode("");
+          setDemoUnlocked(false);
+          setDemoAccessError(error.message);
+        } else setNotice("등록된 옷을 불러오지 못했어요. API를 확인해주세요.");
       });
     return () => {
       cancelled = true;
     };
-  }, [route]);
+  }, [route, demoUnlocked]);
+  const unlockDemo = async (event) => {
+    event.preventDefault();
+    setDemoChecking(true);
+    setDemoAccessError("");
+    setDemoAccessCode(demoCode);
+    try {
+      const items = await loadRegistered();
+      setRegistered(items);
+      setDemoUnlocked(true);
+      setDemoCode("");
+    } catch (error) {
+      setDemoAccessCode("");
+      setDemoAccessError(error.message || "접속 코드를 확인해주세요.");
+    } finally {
+      setDemoChecking(false);
+    }
+  };
   const productImage = (product) =>
     product.imageUrl || `${import.meta.env.BASE_URL}media/${product.image}.jpg`;
   const allProducts = [...registered, ...products];
@@ -536,6 +569,29 @@ function App() {
               </span>
             </section>
           </>
+        ) : isDemoAuthRequired && !demoUnlocked ? (
+          <section className="demo-access section">
+            <span className="section-label">PRIVATE NEIGHBORHOOD DEMO</span>
+            <h1>시연 접속 코드를 입력해주세요.</h1>
+            <p>초대받은 이웃만 옷을 등록하고 볼 수 있어요.</p>
+            <form onSubmit={unlockDemo}>
+              <label htmlFor="demo-access-code">접속 코드</label>
+              <div>
+                <input
+                  id="demo-access-code"
+                  type="password"
+                  autoComplete="off"
+                  value={demoCode}
+                  onChange={(event) => setDemoCode(event.target.value)}
+                  required
+                />
+                <button type="submit" disabled={demoChecking}>
+                  {demoChecking ? "확인 중..." : "동네 옷장 들어가기"}
+                </button>
+              </div>
+              {demoAccessError && <small role="alert">{demoAccessError}</small>}
+            </form>
+          </section>
         ) : (
           <section className="closet section">
             <div className="closet-intro">
@@ -749,7 +805,7 @@ function App() {
           <span>MADE FOR MOMENTS, SHARED WITH NEIGHBORS.</span>
         </div>
       </footer>
-      {route === "closet" && !registerOpen && (
+      {route === "closet" && demoUnlocked && !registerOpen && (
         <div className="register-dock">
           <span>옷장에 잠든 옷이 있나요?</span>
           <button onClick={() => setRegisterOpen(true)}>

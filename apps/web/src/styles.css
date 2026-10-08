@@ -2127,7 +2127,68 @@ p {
 .closet {
   padding-bottom: 145px;
 }
+.demo-access {
+  min-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 780px;
+  margin: 0 auto;
+  padding-top: 100px;
+  padding-bottom: 120px;
+}
+.demo-access h1 {
+  margin: 22px 0 14px;
+  font-size: clamp(36px, 6vw, 66px);
+  line-height: 1.14;
+  letter-spacing: -0.06em;
+}
+.demo-access p {
+  color: #667762;
+  margin-bottom: 38px;
+}
+.demo-access form {
+  width: min(100%, 520px);
+}
+.demo-access label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.demo-access form > div {
+  display: flex;
+  gap: 9px;
+}
+.demo-access input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #d6ded4;
+  border-radius: 7px;
+  padding: 14px;
+  font: inherit;
+}
+.demo-access button {
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: var(--blue);
+  color: white;
+  padding: 14px 18px;
+  font-weight: 700;
+}
+.demo-access button:disabled {
+  opacity: 0.6;
+}
+.demo-access small[role="alert"] {
+  display: block;
+  color: #b33b32;
+  margin-top: 12px;
+}
 @media (max-width: 700px) {
+  .demo-access form > div {
+    flex-direction: column;
+  }
   .register-dock {
     left: 12px;
     right: 12px;
