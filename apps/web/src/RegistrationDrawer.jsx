@@ -14,12 +14,8 @@ import {
   saveRegistered,
   setDisplayName,
 } from "./registration-store";
+import { OCCASIONS } from "./catalog-filters";
 
-const OCCASIONS = {
-  격식: ["레스토랑", "장례", "결혼하객", "면접"],
-  파티: ["클럽", "패션쇼", "페스티벌", "콘서트", "기타"],
-  일상: ["산책", "데이트", "카페", "운동", "기타"],
-};
 const PLACE = "경기도 용인시 기흥구 서농동";
 const today = () => {
   const date = new Date();

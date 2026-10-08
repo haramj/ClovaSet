@@ -843,6 +843,30 @@ footer > div {
 .saved-filter.active {
   color: var(--blue);
 }
+.occasion-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -17px 0 30px;
+}
+.occasion-filters span {
+  margin-right: 5px;
+  color: #737d67;
+  font-size: 12px;
+}
+.occasion-filters button {
+  padding: 8px 15px;
+  border: 1px solid #d9ded2;
+  border-radius: 25px;
+  color: #59604f;
+  font-size: 12px;
+}
+.occasion-filters button.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: white;
+}
 .results-title {
   display: flex;
   justify-content: space-between;

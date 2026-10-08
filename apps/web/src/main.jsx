@@ -28,6 +28,7 @@ import {
   setDisplayName,
 } from "./registration-store";
 import { createChat, loadChat, loadChats, sendChatMessage } from "./chat-store";
+import { filterProducts, OCCASIONS } from "./catalog-filters";
 import { randomId } from "./random-id";
 import {
   demoTimestamp,
@@ -41,6 +42,7 @@ const products = [
     id: "sample-dress",
     name: "오늘의 주인공, 스카이 드레스",
     category: "격식",
+    occasions: ["결혼하객"],
     brand: "STUDIO COLLECTION",
     image: "dress",
     price: 18000,
@@ -55,6 +57,7 @@ const products = [
     id: "sample-jacket",
     name: "분위기를 완성하는 봄버 재킷",
     category: "일상",
+    occasions: ["데이트"],
     brand: "WEEKEND WARDROBE",
     image: "jacket",
     price: 15000,
@@ -69,6 +72,7 @@ const products = [
     id: "sample-bag",
     name: "작지만 확실한 포인트, 미니백",
     category: "파티",
+    occasions: ["기타"],
     brand: "THE LITTLE THINGS",
     image: "bag",
     price: 9000,
@@ -111,6 +115,7 @@ function App() {
   );
   const [menu, setMenu] = useState(false),
     [category, setCategory] = useState("전체"),
+    [occasion, setOccasion] = useState(""),
     [search, setSearch] = useState(""),
     [area, setArea] = useState("전체 동네"),
     [savedOnly, setSavedOnly] = useState(false);
@@ -302,13 +307,14 @@ function App() {
           : "smooth",
       });
   };
-  const filtered = allProducts.filter(
-    (p) =>
-      (category === "전체" || p.category === category) &&
-      (!savedOnly || saved.includes(p.id)) &&
-      (area === "전체 동네" || p.area === area) &&
-      `${p.name} ${p.category} ${p.tag}`.includes(search.trim()),
-  );
+  const filtered = filterProducts(allProducts, {
+    category,
+    occasion,
+    savedOnly,
+    saved,
+    area,
+    search,
+  });
   return (
     <>
       <a
@@ -761,7 +767,10 @@ function App() {
                     key={c}
                     className={category === c ? "active" : ""}
                     aria-pressed={category === c}
-                    onClick={() => setCategory(c)}
+                    onClick={() => {
+                      setCategory(c);
+                      setOccasion("");
+                    }}
                   >
                     {c}
                   </button>
@@ -775,6 +784,28 @@ function App() {
                 <Heart size={16} /> 찜한 옷 {saved.length}
               </button>
             </div>
+            {category !== "전체" && (
+              <div
+                className="occasion-filters"
+                role="group"
+                aria-label={`${category} 용도 필터`}
+              >
+                <span>용도별 보기</span>
+                {["전체 용도", ...OCCASIONS[category]].map((item) => {
+                  const value = item === "전체 용도" ? "" : item;
+                  return (
+                    <button
+                      key={item}
+                      className={occasion === value ? "active" : ""}
+                      aria-pressed={occasion === value}
+                      onClick={() => setOccasion(value)}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             <div className="results-title">
               <h2>
                 {savedOnly ? "나의 관심 옷장" : "이웃의 옷장"}{" "}
@@ -836,6 +867,7 @@ function App() {
                     setSearch("");
                     setArea("전체 동네");
                     setCategory("전체");
+                    setOccasion("");
                     setSavedOnly(false);
                   }}
                 >
@@ -923,6 +955,7 @@ function App() {
         onRegistered={(product) => {
           setRegistered((old) => [product, ...old]);
           setCategory("전체");
+          setOccasion("");
           setSearch("");
           setArea("전체 동네");
           setSavedOnly(false);
