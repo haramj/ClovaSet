@@ -450,21 +450,18 @@ function App() {
                 {[
                   {
                     title: "격식",
-                    sub: "",
                     video: "formal",
                     category: "격식",
                     n: "01",
                   },
                   {
                     title: "일상",
-                    sub: "",
                     video: "daily",
                     category: "일상",
                     n: "02",
                   },
                   {
                     title: "파티",
-                    sub: "",
                     video: "party",
                     category: "파티",
                     n: "03",
@@ -491,6 +488,7 @@ function App() {
                     />
                     <span className="occasion-num">{x.n}</span>
                     <div>
+                      <small>{x.sub}</small>
                       <h3>{x.title}</h3>
                     </div>
                     <span className="round-arrow">

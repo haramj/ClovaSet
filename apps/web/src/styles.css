@@ -524,6 +524,11 @@ h2 {
   transform: translate(-50%, -50%);
   z-index: 1;
 }
+.occasion small {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
 .occasion h3 {
   text-align: center;
   font-size: 40px;
