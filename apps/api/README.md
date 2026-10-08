@@ -30,3 +30,14 @@ Spring Boot 4.0.8, Java 17, Spring Data JPA, Flyway, MySQL 8.4.11.
 서버는 날짜, 가격, 카테고리와 용도 조합, 파일 크기 및 실제 이미지 헤더를 검증합니다. 성공 시 HTTP 201과 등록 JSON을 반환합니다. `GET /api/clothes`로 등록 목록을 조회하고 `GET /api/clothes/{id}/photo`로 사진을 받습니다.
 
 사진은 MySQL `LONGBLOB`에 저장합니다. 시연 단계의 간단한 구조이며 추후 실제 서비스에서는 사진을 별도 저장소로 분리하고 사용자 인증·권한을 추가해야 합니다.
+
+## 공개 서버 배포
+
+`Dockerfile`은 Java 17 실행 이미지를 만듭니다. 호스팅 서비스의 빌드 루트를 `apps/api`로 지정하고 아래 환경 변수를 설정합니다.
+
+- `DB_URL`: MySQL JDBC URL (`jdbc:mysql://호스트:3306/데이터베이스?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul`)
+- `DB_USERNAME`, `DB_PASSWORD`: MySQL 사용자 계정
+- `WEB_ORIGIN`: `https://haramj.github.io` (CORS 허용 출처)
+- `PORT`: 호스팅 서비스가 자동으로 지정하는 HTTP 포트
+
+MySQL 8.4.11 서비스에는 `/var/lib/mysql` 영구 볼륨을 연결해야 재배포 후에도 등록 정보와 사진이 남습니다. 공개 API 도메인이 준비되면 GitHub 저장소 변수 `VITE_API_URL`에 `https://API도메인/api`를 설정하고 웹 배포 워크플로를 다시 실행합니다.
