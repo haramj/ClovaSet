@@ -1,5 +1,24 @@
 const API_BASE =
   import.meta.env.VITE_API_URL?.trim() || (import.meta.env.DEV ? "/api" : null);
+const CODE_KEY = "clovaset:demo-access-code";
+export const isDemoAuthRequired =
+  import.meta.env.VITE_DEMO_ACCESS_REQUIRED === "true";
+
+export function hasDemoAccessCode() {
+  return Boolean(sessionStorage.getItem(CODE_KEY));
+}
+
+export function setDemoAccessCode(code) {
+  if (code) sessionStorage.setItem(CODE_KEY, code.trim());
+  else sessionStorage.removeItem(CODE_KEY);
+}
+
+function authHeaders() {
+  if (!isDemoAuthRequired) return {};
+  const code = sessionStorage.getItem(CODE_KEY);
+  if (!code) throw new Error("시연 접속 코드를 입력해주세요.");
+  return { "X-Demo-Code": code };
+}
 
 function requireApi() {
   if (!API_BASE) {
@@ -10,8 +29,17 @@ function requireApi() {
   return API_BASE.replace(/\/$/, "");
 }
 
-function toProduct(item) {
+async function toProduct(item) {
   const base = requireApi();
+  const photoUrl = base.startsWith("http")
+    ? new URL(item.photoUrl, base).href
+    : item.photoUrl;
+  let imageUrl = photoUrl;
+  if (isDemoAuthRequired) {
+    const response = await fetch(photoUrl, { headers: authHeaders() });
+    if (!response.ok) throw new Error("등록 사진을 불러오지 못했어요.");
+    imageUrl = URL.createObjectURL(await response.blob());
+  }
   return {
     ...item,
     price: Number(item.pricePerDay),
@@ -20,17 +48,19 @@ function toProduct(item) {
     size: item.gender === "남" ? "남성" : "여성",
     brand: "우리 동네 옷장",
     tag: item.occasions[0],
-    imageUrl: base.startsWith("http")
-      ? new URL(item.photoUrl, base).href
-      : item.photoUrl,
+    imageUrl,
     registered: true,
   };
 }
 
 export async function loadRegistered() {
-  const response = await fetch(`${requireApi()}/clothes`);
+  const response = await fetch(`${requireApi()}/clothes`, {
+    headers: authHeaders(),
+  });
+  if (response.status === 401)
+    throw new Error("시연 접속 코드를 확인해주세요.");
   if (!response.ok) throw new Error("등록된 옷을 불러오지 못했어요.");
-  return (await response.json()).map(toProduct);
+  return Promise.all((await response.json()).map(toProduct));
 }
 
 export async function saveRegistered(data, photo) {
@@ -40,6 +70,7 @@ export async function saveRegistered(data, photo) {
   const response = await fetch(`${requireApi()}/clothes`, {
     method: "POST",
     body,
+    headers: authHeaders(),
   });
   if (!response.ok) {
     let message = "등록하지 못했어요. 입력값과 서버 상태를 확인해주세요.";
@@ -49,7 +80,7 @@ export async function saveRegistered(data, photo) {
     } catch {}
     throw new Error(message);
   }
-  return toProduct(await response.json());
+  return await toProduct(await response.json());
 }
 
 export const isRegistrationAvailable = Boolean(API_BASE);

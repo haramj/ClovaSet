@@ -54,6 +54,18 @@ cd apps/api
 - PR에서 Spring API·MySQL 마이그레이션 테스트와 웹 빌드를 검사합니다. `main`에 푸시하면 검사 통과 후 GitHub Pages에 배포합니다.
 - 웹 배포 파일에는 API 키, `.env`, OpenCode 설정을 포함하지 않습니다.
 
+### 접근 코드가 있는 임시 시연 서버
+
+`compose.demo.yaml`은 기존 로컬 DB와 분리된 MySQL 8.4.11 영구 볼륨을 만듭니다. API는 이 컴퓨터의 `127.0.0.1:8081`에만 열리고, 모든 `/api/` 요청에 시연 접속 코드가 필요합니다. 등록은 최대 50건으로 제한됩니다.
+
+```sh
+node scripts/prepare-demo-env.mjs
+cd apps/api && ./mvnw -DskipTests package && cd ../..
+docker compose -f compose.demo.yaml --env-file .env.demo up -d --build
+```
+
+접속 코드는 Git에 올리지 않는 `.env.demo`의 `DEMO_ACCESS_CODE`입니다. 외부 공개는 인증된 터널 주소가 준비된 동안만 사용합니다. 임시 터널 주소는 재시작 때 바뀌며, 이 컴퓨터가 꺼지면 외부 접근이 중단됩니다. MySQL 데이터는 Docker 영구 볼륨에 남습니다. 공개 웹 빌드에는 GitHub 저장소 변수 `VITE_API_URL=https://터널주소/api`와 `VITE_DEMO_ACCESS_REQUIRED=true`를 함께 설정해야 합니다. 접근 코드는 웹 빌드에 넣지 않습니다.
+
 찜과 대여 요청 체험은 localStorage를 사용합니다. 예시 상품의 가격·위치는 데모 데이터입니다. 영상은 사진에 움직임을 적용한 모션 영상입니다. [미디어 기록](docs/architecture/media.md)을 참고하세요.
 
 ## OpenCode 개발 환경

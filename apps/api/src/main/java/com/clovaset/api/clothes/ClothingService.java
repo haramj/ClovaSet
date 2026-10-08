@@ -1,6 +1,7 @@
 package com.clovaset.api.clothes;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,9 @@ public class ClothingService {
     );
     private static final long MAX_PHOTO_SIZE = 5 * 1024 * 1024;
     private final ClothingRepository repository;
+
+    @Value("${MAX_CLOTHES:1000000}")
+    private long maxClothes = 1000000;
 
     public ClothingService(ClothingRepository repository) { this.repository = repository; }
 
@@ -46,6 +50,8 @@ public class ClothingService {
         catch (IOException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "사진을 읽을 수 없습니다."); }
         String mime = imageType(bytes);
         if (mime == null) bad("JPG, PNG, WebP 사진만 등록할 수 있습니다.");
+        if (repository.count() >= maxClothes)
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "시연용 등록 한도에 도달했습니다.");
         Clothing clothing = new Clothing(request.gender(), request.category(), new LinkedHashSet<>(request.occasions()),
             request.name().trim(), request.description().trim(), request.pricePerDay(), request.rentalStart(),
             request.rentalEnd(), request.pickupPlace().trim(), mime, bytes);

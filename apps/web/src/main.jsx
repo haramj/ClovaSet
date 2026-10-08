@@ -18,13 +18,19 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import RegistrationDrawer from "./RegistrationDrawer";
-import { loadRegistered, isRegistrationAvailable } from "./registration-store";
+import {
+  loadRegistered,
+  isRegistrationAvailable,
+  isDemoAuthRequired,
+  hasDemoAccessCode,
+  setDemoAccessCode,
+} from "./registration-store";
 
 const products = [
   {
-    id: 1,
+    id: "sample-dress",
     name: "오늘의 주인공, 스카이 드레스",
-    category: "드레스",
+    category: "격식",
     brand: "STUDIO COLLECTION",
     image: "dress",
     price: 18000,
@@ -36,9 +42,9 @@ const products = [
       "자연스럽게 떨어지는 실루엣의 스카이 블루 드레스. 결혼식부터 특별한 저녁 약속까지 함께해요.",
   },
   {
-    id: 2,
+    id: "sample-jacket",
     name: "분위기를 완성하는 봄버 재킷",
-    category: "아우터",
+    category: "일상",
     brand: "WEEKEND WARDROBE",
     image: "jacket",
     price: 15000,
@@ -50,9 +56,9 @@ const products = [
       "가볍게 걸쳐도 멋스러운 빈티지 무드의 재킷. 평범한 일상에도 새로운 분위기를 더해요.",
   },
   {
-    id: 3,
+    id: "sample-bag",
     name: "작지만 확실한 포인트, 미니백",
-    category: "가방",
+    category: "파티",
     brand: "THE LITTLE THINGS",
     image: "bag",
     price: 9000,
@@ -84,7 +90,7 @@ function Logo() {
   return (
     <a href="#/" className="logo">
       <img
-        src="../public/media/icon.png"
+        src={`${import.meta.env.BASE_URL}media/icon.png`}
         alt="Clova Set Logo"
         style={{ width: "auto", height: "52px" }}
       />
@@ -106,6 +112,12 @@ function App() {
     [registerOpen, setRegisterOpen] = useState(false),
     [selected, setSelected] = useState(null),
     [notice, setNotice] = useState("");
+  const [demoUnlocked, setDemoUnlocked] = useState(
+      () => !isDemoAuthRequired || hasDemoAccessCode(),
+    ),
+    [demoCode, setDemoCode] = useState(""),
+    [demoAccessError, setDemoAccessError] = useState(""),
+    [demoChecking, setDemoChecking] = useState(false);
   const [paused, setPaused] = useState(
       () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     ),
@@ -158,20 +170,41 @@ function App() {
     }
   }, [selected]);
   useEffect(() => {
-    if (route !== "closet" || !isRegistrationAvailable) return;
+    if (route !== "closet" || !isRegistrationAvailable || !demoUnlocked) return;
     let cancelled = false;
     loadRegistered()
       .then((items) => {
         if (!cancelled) setRegistered(items);
       })
-      .catch(() => {
-        if (!cancelled)
-          setNotice("등록된 옷을 불러오지 못했어요. API를 확인해주세요.");
+      .catch((error) => {
+        if (cancelled) return;
+        if (isDemoAuthRequired && error.message.includes("접속 코드")) {
+          setDemoAccessCode("");
+          setDemoUnlocked(false);
+          setDemoAccessError(error.message);
+        } else setNotice("등록된 옷을 불러오지 못했어요. API를 확인해주세요.");
       });
     return () => {
       cancelled = true;
     };
-  }, [route]);
+  }, [route, demoUnlocked]);
+  const unlockDemo = async (event) => {
+    event.preventDefault();
+    setDemoChecking(true);
+    setDemoAccessError("");
+    setDemoAccessCode(demoCode);
+    try {
+      const items = await loadRegistered();
+      setRegistered(items);
+      setDemoUnlocked(true);
+      setDemoCode("");
+    } catch (error) {
+      setDemoAccessCode("");
+      setDemoAccessError(error.message || "접속 코드를 확인해주세요.");
+    } finally {
+      setDemoChecking(false);
+    }
+  };
   const productImage = (product) =>
     product.imageUrl || `${import.meta.env.BASE_URL}media/${product.image}.jpg`;
   const allProducts = [...registered, ...products];
@@ -419,21 +452,21 @@ function App() {
                     title: "마음을 전하는 날",
                     sub: "WEDDING GUEST",
                     image: "dress",
-                    category: "드레스",
+                    category: "격식",
                     n: "01",
                   },
                   {
                     title: "조금 다른 나를 만나는 날",
                     sub: "A SPECIAL DATE",
                     image: "jacket",
-                    category: "아우터",
+                    category: "일상",
                     n: "02",
                   },
                   {
                     title: "작은 포인트가 필요한 날",
                     sub: "FINISHING TOUCH",
                     image: "bag",
-                    category: "가방",
+                    category: "파티",
                     n: "03",
                   },
                 ].map((x) => (
@@ -540,6 +573,29 @@ function App() {
               </span>
             </section>
           </>
+        ) : isDemoAuthRequired && !demoUnlocked ? (
+          <section className="demo-access section">
+            <span className="section-label">PRIVATE NEIGHBORHOOD DEMO</span>
+            <h1>시연 접속 코드를 입력해주세요.</h1>
+            <p>초대받은 이웃만 옷을 등록하고 볼 수 있어요.</p>
+            <form onSubmit={unlockDemo}>
+              <label htmlFor="demo-access-code">접속 코드</label>
+              <div>
+                <input
+                  id="demo-access-code"
+                  type="password"
+                  autoComplete="off"
+                  value={demoCode}
+                  onChange={(event) => setDemoCode(event.target.value)}
+                  required
+                />
+                <button type="submit" disabled={demoChecking}>
+                  {demoChecking ? "확인 중..." : "동네 옷장 들어가기"}
+                </button>
+              </div>
+              {demoAccessError && <small role="alert">{demoAccessError}</small>}
+            </form>
+          </section>
         ) : (
           <section className="closet section">
             <div className="closet-intro">
@@ -617,15 +673,7 @@ function App() {
             </div>
             <div className="filters">
               <div className="categories">
-                {[
-                  "전체",
-                  "드레스",
-                  "아우터",
-                  "가방",
-                  "격식",
-                  "파티",
-                  "일상",
-                ].map((c) => (
+                {["전체", "격식", "파티", "일상"].map((c) => (
                   <button
                     key={c}
                     className={category === c ? "active" : ""}
@@ -753,7 +801,7 @@ function App() {
           <span>MADE FOR MOMENTS, SHARED WITH NEIGHBORS.</span>
         </div>
       </footer>
-      {route === "closet" && !registerOpen && (
+      {route === "closet" && demoUnlocked && !registerOpen && (
         <div className="register-dock">
           <span>옷장에 잠든 옷이 있나요?</span>
           <button onClick={() => setRegisterOpen(true)}>
