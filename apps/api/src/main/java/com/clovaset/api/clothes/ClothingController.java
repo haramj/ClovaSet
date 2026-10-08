@@ -1,7 +1,7 @@
 package com.clovaset.api.clothes;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +30,7 @@ public class ClothingController {
     public ResponseEntity<ClothingResponse> register(@RequestPart("data") String data, @RequestPart("photo") MultipartFile photo) {
         ClothingRequest request;
         try { request = mapper.readValue(data, ClothingRequest.class); }
-        catch (JsonProcessingException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등록 내용을 확인해주세요."); }
+        catch (JacksonException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등록 내용을 확인해주세요."); }
         // Record validation is applied explicitly because multipart JSON is parsed from a string part.
         var violations = validator.validate(request);
         if (!violations.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "필수 입력값을 확인해주세요.");
