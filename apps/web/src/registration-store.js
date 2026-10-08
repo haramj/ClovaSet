@@ -1,6 +1,8 @@
 const API_BASE =
   import.meta.env.VITE_API_URL?.trim() || (import.meta.env.DEV ? "/api" : null);
 const CODE_KEY = "clovaset:demo-access-code";
+const PARTICIPANT_KEY = "clovaset:participant-token";
+const NAME_KEY = "clovaset:display-name";
 export const isDemoAuthRequired =
   import.meta.env.VITE_DEMO_ACCESS_REQUIRED === "true";
 
@@ -13,14 +15,34 @@ export function setDemoAccessCode(code) {
   else sessionStorage.removeItem(CODE_KEY);
 }
 
-function authHeaders() {
-  if (!isDemoAuthRequired) return {};
-  const code = sessionStorage.getItem(CODE_KEY);
-  if (!code) throw new Error("시연 접속 코드를 입력해주세요.");
-  return { "X-Demo-Code": code };
+export function participantToken() {
+  let token = localStorage.getItem(PARTICIPANT_KEY);
+  if (!token) {
+    token = crypto.randomUUID();
+    localStorage.setItem(PARTICIPANT_KEY, token);
+  }
+  return token;
 }
 
-function requireApi() {
+export function getDisplayName() {
+  return localStorage.getItem(NAME_KEY) || "";
+}
+
+export function setDisplayName(name) {
+  localStorage.setItem(NAME_KEY, name.trim());
+}
+
+export function authHeaders() {
+  const headers = { "X-Participant-Token": participantToken() };
+  if (isDemoAuthRequired) {
+    const code = sessionStorage.getItem(CODE_KEY);
+    if (!code) throw new Error("시연 접속 코드를 입력해주세요.");
+    headers["X-Demo-Code"] = code;
+  }
+  return headers;
+}
+
+export function requireApi() {
   if (!API_BASE) {
     throw new Error(
       "등록 서버가 연결되지 않았어요. 잠시 후 다시 시도해주세요.",

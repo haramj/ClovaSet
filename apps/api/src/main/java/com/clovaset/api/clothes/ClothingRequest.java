@@ -14,5 +14,6 @@ public record ClothingRequest(
     @NotNull @DecimalMin("1") BigDecimal pricePerDay,
     @NotNull LocalDate rentalStart,
     @NotNull LocalDate rentalEnd,
-    @NotBlank @Size(max = 100) String pickupPlace
+    @NotBlank @Size(max = 100) String pickupPlace,
+    @Size(max = 40) String ownerName
 ) {}

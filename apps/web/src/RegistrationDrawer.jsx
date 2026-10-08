@@ -8,7 +8,12 @@ import {
   MapPin,
   X,
 } from "lucide-react";
-import { isRegistrationAvailable, saveRegistered } from "./registration-store";
+import {
+  getDisplayName,
+  isRegistrationAvailable,
+  saveRegistered,
+  setDisplayName,
+} from "./registration-store";
 
 const OCCASIONS = {
   격식: ["레스토랑", "장례", "결혼하객", "면접"],
@@ -27,6 +32,7 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
   const [category, setCategory] = useState("");
   const [occasions, setOccasions] = useState([]);
   const [name, setName] = useState("");
+  const [ownerName, setOwnerName] = useState(getDisplayName);
   const [photo, setPhoto] = useState(null);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -65,6 +71,7 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
     setCategory("");
     setOccasions([]);
     setName("");
+    setOwnerName(getDisplayName());
     setPhoto(null);
     setDescription("");
     setPrice("");
@@ -93,8 +100,11 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
       setError("성별, 카테고리, 용도를 선택해주세요.");
       return;
     }
-    if (step === 2 && (!name.trim() || !photo || !description.trim())) {
-      setError("옷 이름, 사진, 설명을 모두 입력해주세요.");
+    if (
+      step === 2 &&
+      (!name.trim() || !ownerName.trim() || !photo || !description.trim())
+    ) {
+      setError("올린 사람 이름, 옷 이름, 사진, 설명을 모두 입력해주세요.");
       return;
     }
     setError("");
@@ -133,6 +143,7 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
           category,
           occasions,
           name: name.trim(),
+          ownerName: ownerName.trim(),
           description: description.trim(),
           pricePerDay: Number(price),
           rentalStart,
@@ -141,6 +152,7 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
         },
         photo,
       );
+      setDisplayName(ownerName);
       onRegistered(product);
     } catch (ex) {
       setError(ex.message || "등록하지 못했어요. 잠시 후 다시 시도해주세요.");
@@ -262,6 +274,19 @@ export default function RegistrationDrawer({ open, onClose, onRegistered }) {
                 들려주세요.
               </h2>
               <p>사진 한 장과 짧은 소개면 충분해요.</p>
+              <label className="registration-field">
+                올린 사람 이름 <b>*</b>
+                <input
+                  type="text"
+                  maxLength="40"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  placeholder="예: 서농동 이웃"
+                />
+                <small>
+                  이 브라우저에서 이 옷에 대한 채팅 요청을 받을 수 있어요.
+                </small>
+              </label>
               <label className="registration-field">
                 내 옷 이름 <b>*</b>
                 <input

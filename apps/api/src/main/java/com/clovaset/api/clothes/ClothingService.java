@@ -1,5 +1,6 @@
 package com.clovaset.api.clothes;
 
+import com.clovaset.api.config.ParticipantIdentity;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ClothingService {
+    private static final ZoneId DEMO_ZONE = ZoneId.of("Asia/Seoul");
     private static final Map<String, Set<String>> OCCASIONS = Map.of(
         "격식", Set.of("레스토랑", "장례", "결혼하객", "면접"),
         "파티", Set.of("클럽", "패션쇼", "페스티벌", "콘서트", "기타"),
@@ -29,7 +32,13 @@ public class ClothingService {
 
     @Transactional(readOnly = true)
     public List<ClothingResponse> list() {
-        return repository.findAllByOrderByCreatedAtDesc().stream().map(ClothingResponse::from).toList();
+        return list(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClothingResponse> list(String participantToken) {
+        String hash = participantToken == null ? null : ParticipantIdentity.hash(participantToken);
+        return repository.findAllByOrderByCreatedAtDesc().stream().map(item -> ClothingResponse.from(item, hash)).toList();
     }
 
     @Transactional(readOnly = true)
@@ -39,11 +48,16 @@ public class ClothingService {
 
     @Transactional
     public ClothingResponse register(ClothingRequest request, MultipartFile photo) {
+        return register(request, photo, null);
+    }
+
+    @Transactional
+    public ClothingResponse register(ClothingRequest request, MultipartFile photo, String participantToken) {
         if (!Set.of("남", "녀").contains(request.gender())) bad("성별을 선택해주세요.");
         Set<String> allowed = OCCASIONS.get(request.category());
         if (allowed == null || request.occasions().stream().anyMatch(o -> !allowed.contains(o))) bad("카테고리와 용도를 확인해주세요.");
         if (request.pricePerDay().scale() > 0 || request.pricePerDay().compareTo(new java.math.BigDecimal("10000000")) > 0) bad("가격은 1원부터 1천만 원 이하로 입력해주세요.");
-        if (request.rentalStart().isBefore(LocalDate.now()) || request.rentalEnd().isBefore(request.rentalStart())) bad("대여 기간을 확인해주세요.");
+        if (request.rentalStart().isBefore(LocalDate.now(DEMO_ZONE)) || request.rentalEnd().isBefore(request.rentalStart())) bad("대여 기간을 확인해주세요.");
         if (photo == null || photo.isEmpty() || photo.getSize() > MAX_PHOTO_SIZE) bad("5MB 이하 사진을 등록해주세요.");
         byte[] bytes;
         try { bytes = photo.getBytes(); }
@@ -55,7 +69,12 @@ public class ClothingService {
         Clothing clothing = new Clothing(request.gender(), request.category(), new LinkedHashSet<>(request.occasions()),
             request.name().trim(), request.description().trim(), request.pricePerDay(), request.rentalStart(),
             request.rentalEnd(), request.pickupPlace().trim(), mime, bytes);
-        return ClothingResponse.from(repository.saveAndFlush(clothing));
+        String ownerHash = participantToken == null ? null : ParticipantIdentity.hash(participantToken);
+        if (ownerHash != null) {
+            if (request.ownerName() == null || request.ownerName().isBlank()) bad("올린 사람 이름을 입력해주세요.");
+            clothing.setOwner(request.ownerName().trim(), ownerHash);
+        }
+        return ClothingResponse.from(repository.saveAndFlush(clothing), ownerHash);
     }
 
     private void bad(String message) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message); }

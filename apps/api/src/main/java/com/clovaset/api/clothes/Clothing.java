@@ -42,6 +42,12 @@ public class Clothing {
     @Column(name = "pickup_place", nullable = false, length = 100)
     private String pickupPlace;
 
+    @Column(name = "owner_name", length = 40)
+    private String ownerName;
+
+    @Column(name = "owner_token_hash", length = 64)
+    private String ownerTokenHash;
+
     @Column(name = "photo_content_type", nullable = false, length = 30)
     private String photoContentType;
 
@@ -80,6 +86,12 @@ public class Clothing {
     public LocalDate getRentalStart() { return rentalStart; }
     public LocalDate getRentalEnd() { return rentalEnd; }
     public String getPickupPlace() { return pickupPlace; }
+    public String getOwnerName() { return ownerName; }
+    public String getOwnerTokenHash() { return ownerTokenHash; }
+    public void setOwner(String ownerName, String ownerTokenHash) {
+        this.ownerName = ownerName;
+        this.ownerTokenHash = ownerTokenHash;
+    }
     public String getPhotoContentType() { return photoContentType; }
     public byte[] getPhotoData() { return photoData; }
     public LocalDateTime getCreatedAt() { return createdAt; }

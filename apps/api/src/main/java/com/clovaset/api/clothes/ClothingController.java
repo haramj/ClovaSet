@@ -24,17 +24,20 @@ public class ClothingController {
     }
 
     @GetMapping
-    public List<ClothingResponse> list() { return service.list(); }
+    public List<ClothingResponse> list(@RequestHeader(value = "X-Participant-Token", required = false) String participantToken) {
+        return service.list(participantToken);
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ClothingResponse> register(@RequestPart("data") String data, @RequestPart("photo") MultipartFile photo) {
+    public ResponseEntity<ClothingResponse> register(@RequestPart("data") String data, @RequestPart("photo") MultipartFile photo,
+                                                      @RequestHeader(value = "X-Participant-Token", required = false) String participantToken) {
         ClothingRequest request;
         try { request = mapper.readValue(data, ClothingRequest.class); }
         catch (JacksonException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "등록 내용을 확인해주세요."); }
         // Record validation is applied explicitly because multipart JSON is parsed from a string part.
         var violations = validator.validate(request);
         if (!violations.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "필수 입력값을 확인해주세요.");
-        ClothingResponse result = service.register(request, photo);
+        ClothingResponse result = service.register(request, photo, participantToken);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

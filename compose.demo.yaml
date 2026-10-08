@@ -35,6 +35,7 @@ services:
       DEMO_ACCESS_CODE: ${DEMO_ACCESS_CODE:?Set DEMO_ACCESS_CODE in .env.demo}
       WEB_ORIGIN: https://haramj.github.io
       MAX_CLOTHES: 50
+      MAX_CHATS: 100
       PORT: 8080
     ports:
       - "127.0.0.1:8081:8080"

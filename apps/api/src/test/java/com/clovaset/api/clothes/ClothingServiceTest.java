@@ -19,7 +19,7 @@ class ClothingServiceTest {
 
     private ClothingRequest request(String category, List<String> occasions) {
         return new ClothingRequest("녀", category, occasions, "재킷", "깨끗한 재킷", new BigDecimal("15000"),
-            LocalDate.now().plusDays(1), LocalDate.now().plusDays(3), "경기도 용인시 기흥구 서농동");
+            LocalDate.now().plusDays(1), LocalDate.now().plusDays(3), "경기도 용인시 기흥구 서농동", null);
     }
 
     @Test
@@ -43,7 +43,7 @@ class ClothingServiceTest {
     void rejectsPastRentalStart() {
         var original = request("일상", List.of("데이트"));
         var past = new ClothingRequest(original.gender(), original.category(), original.occasions(), original.name(),
-            original.description(), original.pricePerDay(), LocalDate.now().minusDays(1), original.rentalEnd(), original.pickupPlace());
+            original.description(), original.pricePerDay(), LocalDate.now().minusDays(1), original.rentalEnd(), original.pickupPlace(), null);
         assertThrows(ResponseStatusException.class, () -> service.register(past, jpeg));
         verifyNoInteractions(repository);
     }
