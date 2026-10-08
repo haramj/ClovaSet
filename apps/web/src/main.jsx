@@ -491,7 +491,6 @@ function App() {
                     />
                     <span className="occasion-num">{x.n}</span>
                     <div>
-                      <small>{x.sub}</small>
                       <h3>{x.title}</h3>
                     </div>
                     <span className="round-arrow">
