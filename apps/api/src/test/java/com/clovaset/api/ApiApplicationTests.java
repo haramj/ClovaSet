@@ -4,6 +4,8 @@ import com.clovaset.api.clothes.ClothingRequest;
 import com.clovaset.api.clothes.ClothingRepository;
 import com.clovaset.api.clothes.ClothingService;
 import org.junit.jupiter.api.Test;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -19,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApiApplicationTests {
     @Autowired ClothingService service;
     @Autowired ClothingRepository repository;
+    @PersistenceContext EntityManager entityManager;
 
     @Test
     @Transactional
@@ -30,6 +33,7 @@ class ApiApplicationTests {
         var created = service.register(request, new MockMultipartFile("photo", "dress.jpg", "image/jpeg", photo));
         assertNotNull(created.id());
         assertEquals(2, created.occasions().size());
+        entityManager.clear();
         var stored = repository.findById(created.id()).orElseThrow();
         assertEquals("시연용 원피스", stored.getName());
         assertArrayEquals(photo, stored.getPhotoData());
