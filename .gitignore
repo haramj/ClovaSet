@@ -24,3 +24,6 @@ uploads/
 # Local OpenCode backups and session data
 opencode.json.backup*
 .opencode/
+
+# Maven output
+target/
