@@ -90,7 +90,7 @@ function Logo() {
   return (
     <a href="#/" className="logo">
       <img
-        src="/media/icon.png"
+        src={`${import.meta.env.BASE_URL}media/icon.png`}
         alt="Clova Set Logo"
         style={{ width: "auto", height: "52px" }}
       />
