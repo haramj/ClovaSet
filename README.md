@@ -9,7 +9,7 @@
 
 특별한 날에만 입는 옷을 동네 이웃과 빌려주고 빌리는 의류 대여 서비스
 
-[![Demo](https://img.shields.io/badge/LIVE_DEMO-둘러보기-315C48?style=for-the-badge)](https://haramj.github.io/ClovaSet/)
+[![Demo](https://img.shields.io/badge/LIVE_DEMO-둘러보기-315C48?style=for-the-badge)](http://211.233.206.104/)
 [![Repository](https://img.shields.io/badge/GITHUB-ClovaSet-181717?style=for-the-badge&logo=github)](https://github.com/haramj/ClovaSet)
 
 ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
@@ -44,13 +44,23 @@ ClovaSet은 **가끔 필요한 옷을 가까운 이웃과 나누는 경험**을 
 
 ## 화면으로 따라가는 ClovaSet
 
-<!-- 실제 화면 캡처가 확보되면 이 섹션에 추가하세요. 아래는 제공된 프로젝트 설명에 근거한 기능 안내입니다. -->
+아래 이미지는 실제 시연 서버에서 촬영한 화면입니다. 동네 옷장 이용에는 시연 접속 코드가 필요합니다.
 
 ### 01 — 랜딩 · 서비스와의 첫 만남
+
+![ClovaSet 랜딩 화면](docs/screenshots/01-landing.jpg)
+
+| 서비스 소개 | 스타일 카테고리 |
+| :---: | :---: |
+| ![서비스 소개](docs/screenshots/03-story.jpg) | ![격식·일상·파티](docs/screenshots/04-collection.jpg) |
+
+![이용 방법](docs/screenshots/05-how-it-works.jpg)
 
 시네마틱 랜딩에서 서비스를 만나고, **서비스 시작하기**를 눌러 동네 옷장으로 이동합니다.
 
 ### 02 — 동네 옷장 · 오늘 필요한 한 벌 찾기
+
+![동네 옷장](docs/screenshots/06-closet.jpg)
 
 | 화면 요소 | 할 수 있는 일 |
 | :--- | :--- |
@@ -60,6 +70,10 @@ ClovaSet은 **가끔 필요한 옷을 가까운 이웃과 나누는 경험**을 
 | 찜 | 관심 있는 옷을 브라우저에 보관 |
 
 ### 03 — 내 옷 등록 · 왼쪽 슬라이드 패널에서 간편하게
+
+| 분류·용도 선택 | 옷 소개·사진 입력 |
+| :---: | :---: |
+| ![등록 분류 단계](docs/screenshots/07-register-style.jpg) | ![등록 소개 단계](docs/screenshots/08-register-details.jpg) |
 
 **서비스 시작하기 → 내 옷 등록하기**에서 등록을 시작합니다.
 
@@ -75,6 +89,17 @@ ClovaSet은 **가끔 필요한 옷을 가까운 이웃과 나누는 경험**을 
 위치는 시연용으로 **경기도 용인시 기흥구 서농동**을 표시하며, GPS나 실제 위치 권한은 사용하지 않습니다.
 
 ### 04 — 대여 요청과 나의 채팅 · 이웃과 대화 시작하기
+
+![상품 상세와 대여 요청](docs/screenshots/09-rental-detail.jpg)
+
+<details>
+<summary>나의 채팅 목록 화면</summary>
+
+![나의 채팅 빈 목록](docs/screenshots/10-chats.jpg)
+
+새 브라우저에서 접속한 상태로, 아직 참여한 채팅방이 없는 화면입니다.
+
+</details>
 
 새로 등록한 옷에는 등록 브라우저의 소유자 정보가 연결됩니다. 다른 브라우저에서 대여를 요청하면, 양쪽의 **나의 채팅**에서 같은 대화를 확인할 수 있습니다.
 
@@ -204,9 +229,9 @@ cd apps/api
 
 ## 공개 데모와 구현 범위
 
-**[공개 웹 열기](https://haramj.github.io/ClovaSet/)** · **[배포 워크플로](https://github.com/haramj/ClovaSet/actions/workflows/web.yml)**
+**[공개 웹 열기](http://211.233.206.104/)** · **[배포 워크플로](https://github.com/haramj/ClovaSet/actions/workflows/web.yml)**
 
-공개 웹은 GitHub Pages의 정적 사이트입니다. 아래 실행 조건은 프로젝트 설명 기준이며, API 연결 여부에 따라 사용 가능한 기능이 달라집니다.
+현재 시연 서버는 Spring API와 연결되어 있으며, 접속 코드 입력 후 동네 옷장과 등록 화면을 이용할 수 있습니다. GitHub Pages의 정적 웹 배포 구성도 별도로 지원합니다. 아래 표는 기능별 실행 조건을 정리합니다.
 
 | 기능 | 동작 조건 |
 | :--- | :--- |
@@ -309,6 +334,6 @@ ClovaSet은 코드와 코드 밖의 다양한 기여가 함께 모여 만들어�
 **ClovaSet**  
 특별한 날을 위한 선택, 가까운 옷장에서.
 
-[서비스 둘러보기 ↗](https://haramj.github.io/ClovaSet/)
+[서비스 둘러보기 ↗](http://211.233.206.104/)
 
 </div>
