@@ -94,3 +94,4 @@ npm test
 ```
 
 설정 참고: [OpenCode 환경 변수](https://opencode.ai/docs/config/#env-vars), [CLOVA Studio 호환 API](https://guide.ncloud-docs.com/docs/clovastudio-dev-langchain), [Vite GitHub Pages 배포](https://vite.dev/guide/static-deploy.html#github-pages).
+
