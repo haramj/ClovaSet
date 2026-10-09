@@ -18,7 +18,7 @@
 
 ## 로컬 전체 실행
 
-Node.js 22.12+, Java 17+, Docker Desktop이 필요합니다. 저장소 루트에서:
+Node.js 22.12+, Java 17+, Docker Desktop이 필요합니다. 저장소 루트에서 :
 
 ```sh
 docker compose up -d mysql
